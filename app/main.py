@@ -1,5 +1,7 @@
 import streamlit as st
 
+import os
+import signal
 from app.ui.dashboard import render_dashboard
 from app.ui.regras import regras_page
 from app.ui.alertas import alertas_page
@@ -26,8 +28,12 @@ def main():
         index=["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)", "Import/Export"].index(nav_default)
     )
     if st.sidebar.button("Sair"):
-        st.sidebar.success("Sessão encerrada. Feche esta aba e interrompa o Streamlit no terminal (Ctrl+C).")
-        st.stop()
+        # encerra o processo do Streamlit imediatamente, sem ações manuais
+        st.sidebar.info("Encerrando o aplicativo...")
+        try:
+            os.kill(os.getpid(), signal.SIGTERM)
+        except Exception:
+            os._exit(0)
     if page == "Dashboard":
         render_dashboard()
     elif page == "Atividades":
