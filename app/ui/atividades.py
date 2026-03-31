@@ -152,37 +152,45 @@ def atividades_page():
         if not evidencias:
             st.markdown('<div class="empty-state">Nenhuma evidência vinculada.</div>', unsafe_allow_html=True)
         else:
-            col_sizes = [1.0, 2.0, 2.2, 1.3, 1.3, 0.9, 0.9, 0.9]
-            header = st.columns(col_sizes)
-            header_labels = [
-                "Tipo",
-                "Nome",
-                "Caminho",
-                "Data inserção",
-                "Data documento",
-                "Obrigatória",
-                "Aprovada",
-                "Ações",
-            ]
+            col_sizes = [1.0, 1.5, 1.8, 1.4, 1.4, 1.0, 1.0, 0.9]
+            tbl = st.container()
+            tbl.markdown(
+                """
+                <style>
+                .ev-card {background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;}
+                .ev-header {background:#f6f7fb;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb;padding:10px 6px;}
+                .ev-row {border-bottom:1px solid #e5e7eb;padding:10px 6px;}
+                .ev-row:last-child {border-bottom:0;}
+                .ev-cell {color:#111827;}
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
+            tbl.markdown("<div class='ev-card'>", unsafe_allow_html=True)
+
+            header = tbl.columns(col_sizes)
+            header_labels = ["Tipo", "Nome", "Caminho", "Data inserção", "Data documento", "Obrigatória", "Aprovada", "Ações"]
             for h, lbl in zip(header, header_labels):
-                h.markdown(f"**{lbl}**")
+                h.markdown(f"<div class='ev-header'>{lbl}</div>", unsafe_allow_html=True)
 
-            st.markdown("<hr style='margin:6px 0 12px 0; border:0; border-top:1px solid #e5e7eb;'/>", unsafe_allow_html=True)
+            for e in evidencias:
+                c1, c2, c3, c4, c5, c6, c7, c8 = tbl.columns(col_sizes)
+                c1.markdown(f"<div class='ev-row ev-cell'>{e['tipo']}</div>", unsafe_allow_html=True)
+                c2.markdown(f"<div class='ev-row ev-cell'>{e['nome_arquivo'] or '-'}</div>", unsafe_allow_html=True)
+                c3.markdown(f"<div class='ev-row ev-cell'>{e['caminho_arquivo'] or '-'}</div>", unsafe_allow_html=True)
+                c4.markdown(f"<div class='ev-row ev-cell'>{e['data_anexacao']}</div>", unsafe_allow_html=True)
+                c5.markdown(f"<div class='ev-row ev-cell'>{e['data_validade'] or '-'}</div>", unsafe_allow_html=True)
+                c6.markdown(f"<div class='ev-row ev-cell'>{'Sim' if e['obrigatoria'] else 'Não'}</div>", unsafe_allow_html=True)
+                c7.markdown(f"<div class='ev-row ev-cell'>{'Sim' if e['aprovada'] else 'Não'}</div>", unsafe_allow_html=True)
+                with c8:
+                    st.markdown("<div class='ev-row'>", unsafe_allow_html=True)
+                    if st.button("Apagar", key=f"del_ev_{e['id']}"):
+                        evidencias_repository.soft_delete(conn, e["id"])
+                        st.success("Evidência removida.")
+                        st.rerun()
+                    st.markdown("</div>", unsafe_allow_html=True)
 
-            for idx, e in enumerate(evidencias):
-                c1, c2, c3, c4, c5, c6, c7, c8 = st.columns(col_sizes)
-                c1.write(e["tipo"])
-                c2.write(e["nome_arquivo"] or "-")
-                c3.write(e["caminho_arquivo"] or "-")
-                c4.write(e["data_anexacao"])
-                c5.write(e["data_validade"] or "-")
-                c6.write("Sim" if e["obrigatoria"] else "Não")
-                c7.write("Sim" if e["aprovada"] else "Não")
-                if c8.button("Apagar", key=f"del_ev_{e['id']}"):
-                    evidencias_repository.soft_delete(conn, e["id"])
-                    st.success("Evidência removida.")
-                    st.rerun()
-                st.markdown("<hr style='margin:4px 0 10px 0; border:0; border-top:1px solid #e5e7eb;'/>", unsafe_allow_html=True)
+            tbl.markdown("</div>", unsafe_allow_html=True)
 
         st.subheader("Anexar nova evidência")
         with st.form("evid_edit"):
