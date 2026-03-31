@@ -24,6 +24,9 @@ def load_data(conn, ano_id):
 def render_header(anos, ano_selecionado):
     st.title("Avaliação de Desempenho Docente — Dashboard")
     col1, col2, col3, col4 = st.columns([3, 2, 2, 2])
+    def go(page):
+        st.session_state["nav"] = page
+        st.rerun()
     with col1:
         st.selectbox(
             "Ano de referência",
@@ -33,12 +36,12 @@ def render_header(anos, ano_selecionado):
             help="Selecione o ano que deseja analisar",
         )
     with col2:
-        st.button("Nova atividade", type="primary")
+        st.button("Nova atividade", type="primary", on_click=lambda: go("Atividades"))
     with col3:
-        st.button("Gerar relatório")
+        st.button("Gerar relatório", on_click=lambda: go("Relatório"))
     with col4:
-        st.button("Analisar com ChatGPT")
-    st.button("Registrar check-in", use_container_width=True)
+        st.button("Analisar com ChatGPT", on_click=lambda: go("ChatGPT (MVP)"))
+    st.button("Registrar check-in", use_container_width=True, on_click=lambda: go("Check-ins"))
 
 
 def render_cards(meta_row, resumo):

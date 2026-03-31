@@ -14,6 +14,7 @@ def main():
     page = st.sidebar.radio(
         "Ir para",
         ["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)"],
+        key="nav",
     )
     if page == "Dashboard":
         render_dashboard()
