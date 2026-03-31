@@ -76,11 +76,18 @@ Observação: apenas metadados são gravados; os arquivos permanecem onde você 
 - Somente leitura/consulta: sugestões não alteram o banco automaticamente. Botão “Salvar sugestão” grava em `sugestoes_chatgpt`.
 
 ## 10. Importar / Exportar CSV
-- **Exportar base**: botão “Gerar ZIP com CSVs” gera um ZIP com um CSV por tabela do SQLite (todas as colunas).
-- **Importar base**: envie um ZIP com arquivos `nome_da_tabela.csv` (colunas idênticas às da tabela) e escolha:
-  - **Mesclar (merge)**: `INSERT OR REPLACE` linha a linha.
-  - **Sobrescrever tudo**: apaga a tabela e insere o conteúdo do CSV.
-- Útil para backup, migração ou carga massiva.
+### Exportar
+- Botão “Gerar ZIP com CSVs” gera um ZIP contendo um arquivo CSV por tabela do SQLite (todas as colunas). O cabeçalho do CSV segue exatamente os nomes das colunas da tabela.
+
+### Importar
+- Envie um ZIP com **um CSV por tabela**. O nome do arquivo deve ser exatamente `nome_da_tabela.csv` (ex.: `atividades.csv`, `evidencias.csv`, `regras_pontuacao.csv`, `anos_avaliacao.csv`, etc.).
+- O cabeçalho do CSV precisa corresponder 1:1 aos nomes de colunas da tabela.
+- Modos:
+  - **Mesclar (merge)**: `INSERT OR REPLACE` — atualiza linhas existentes (mesmo id) e insere novas.
+  - **Sobrescrever tudo**: apaga a tabela antes de inserir (cuidado: substitui todo o conteúdo daquela tabela).
+- Campo de texto: use UTF-8; separador padrão `,` (vírgula); decimal em ponto.
+- Ordem das colunas não é rígida, mas o nome precisa coincidir; colunas ausentes serão `NULL`.
+- Recomendado exportar uma vez para pegar o modelo de CSV (estrutura e colunas) antes de preparar uma carga.
 
 ## 11. Onde ficam as evidências no banco
 - Tabela: `evidencias`
