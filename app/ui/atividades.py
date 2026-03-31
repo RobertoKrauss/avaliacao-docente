@@ -167,7 +167,9 @@ def atividades_page():
             for h, lbl in zip(header, header_labels):
                 h.markdown(f"**{lbl}**")
 
-            for e in evidencias:
+            for idx, e in enumerate(evidencias):
+                if idx > 0:
+                    st.divider()
                 c1, c2, c3, c4, c5, c6, c7, c8 = st.columns(col_sizes)
                 c1.write(e["tipo"])
                 c2.write(e["nome_arquivo"] or "-")
