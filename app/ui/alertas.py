@@ -38,11 +38,13 @@ def alertas_page():
         severidade=sev_sel,
         resolvido=resolvido_val,
     )
-    # remover alertas cujas atividades não existem mais (evita alarmes falsos)
-    atividades_ids = {a["id"] for a in atividades_repository.list_by_ano(conn, ano_row["id"])}
-    alertas = [
-        a for a in alertas if (a["atividade_id"] is None) or (a["atividade_id"] in atividades_ids)
-    ]
+    # remover alertas cujas atividades não existem (evita alarmes falsos)
+    def atividade_existe(aid):
+        if aid is None:
+            return True
+        return atividades_repository.get(conn, aid) is not None
+
+    alertas = [a for a in alertas if atividade_existe(a["atividade_id"])]
 
     if not alertas:
         st.info("Nenhum alerta encontrado com os filtros.")
