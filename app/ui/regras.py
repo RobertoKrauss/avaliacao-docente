@@ -78,6 +78,68 @@ def regras_page():
                 regras_repository.duplicar(conn, regra_id)
                 st.success("Regra duplicada.")
 
+        # Edição da regra selecionada
+        if regra_id:
+            regra = regras_repository.get(conn, regra_id)
+            st.markdown("---")
+            st.subheader("Editar regra personalizada selecionada")
+            with st.form("form_edit_regra"):
+                nome_e = st.text_input("Nome da regra", value=regra["nome"], max_chars=120)
+                categoria_e = st.selectbox(
+                    "Fator", ["formacao", "funcional", "producao"], index=["formacao", "funcional", "producao"].index(regra["categoria_principal"])
+                )
+                subtipo_e = st.text_input("Subtipo (opcional)", value=regra["subtipo"] or "", max_chars=60)
+                descricao_e = st.text_area("Descrição da regra", value=regra["descricao_regra"] or "")
+                justificativa_e = st.text_area("Justificativa (obrigatória)", value=regra["justificativa"] or "")
+                tipo_e = st.selectbox(
+                    "Tipo de fórmula",
+                    ["fixo", "por_unidade", "por_hora", "intervalo", "manual"],
+                    index=["fixo", "por_unidade", "por_hora", "intervalo", "manual"].index(regra["tipo_formula"]),
+                )
+                valor_base_e = st.number_input("Valor base", min_value=0.0, step=0.5, value=float(regra["valor_base"] or 0.0))
+                unidade_e = st.text_input(
+                    "Unidade (evento, hora, etc.)",
+                    value=regra["unidade"] or "",
+                )
+                divisor_e = (
+                    st.number_input("Divisor (aplicável para por_hora)", min_value=0.0, step=0.5, value=float(regra["divisor_unidade"] or 0.0))
+                    if tipo_e == "por_hora"
+                    else None
+                )
+                teto_e = st.number_input("Pontuação máxima (opcional)", min_value=0.0, step=0.5, value=float(regra["pontuacao_maxima"] or 0.0))
+                evidencia_e = st.text_input("Evidência necessária (opcional)", value=regra["evidencia_necessaria"] or "")
+                origem_doc_e = st.text_input("Origem do documento (opcional)", value=regra["origem_documento"] or "")
+                ativa_e = st.checkbox("Ativa", value=bool(regra["ativa"]))
+                preview_e = _preview_formula(tipo_e, valor_base_e, divisor_e, unidade_e, teto_e if teto_e > 0 else None)
+                st.caption(f"Prévia: {preview_e}")
+                submitted_e = st.form_submit_button("Salvar alterações")
+                if submitted_e:
+                    try:
+                        regras_repository.update_personalizada(
+                            conn,
+                            regra_id,
+                            {
+                                "nome": nome_e,
+                                "categoria_principal": categoria_e,
+                                "subtipo": subtipo_e or None,
+                                "descricao_regra": descricao_e,
+                                "justificativa": justificativa_e,
+                                "tipo_formula": tipo_e,
+                                "valor_base": valor_base_e if valor_base_e > 0 else None,
+                                "unidade": unidade_e or None,
+                                "divisor_unidade": divisor_e,
+                                "pontuacao_maxima": teto_e or None,
+                                "exige_valor_manual": 1 if tipo_e in ("manual", "intervalo") else 0,
+                                "evidencia_necessaria": evidencia_e or None,
+                                "origem_documento": origem_doc_e or None,
+                                "ativa": 1 if ativa_e else 0,
+                            },
+                        )
+                        st.success("Regra atualizada.")
+                        st.rerun()
+                    except ValueError as e:
+                        st.error(str(e))
+
     with tab_nova:
         st.subheader("Criar nova regra personalizada")
         with st.form("form_regra"):
