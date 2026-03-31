@@ -7,6 +7,7 @@ from app.ui.checkins import checkins_page
 from app.ui.relatorio import relatorio_page
 from app.ui.chatgpt_mvp import chatgpt_page
 from app.ui.atividades import atividades_page
+from app.ui.import_export import import_export_page
 
 
 def main():
@@ -20,9 +21,9 @@ def main():
     st.sidebar.title("Navegação")
     page = st.sidebar.radio(
         "Ir para",
-        ["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)"],
+        ["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)", "Import/Export"],
         key="nav",
-        index=["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)"].index(nav_default)
+        index=["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)", "Import/Export"].index(nav_default)
     )
     if page == "Dashboard":
         render_dashboard()
@@ -36,8 +37,10 @@ def main():
         checkins_page()
     elif page == "Relatório":
         relatorio_page()
-    else:
+    elif page == "ChatGPT (MVP)":
         chatgpt_page()
+    else:
+        import_export_page()
 
 
 if __name__ == "__main__":
