@@ -167,9 +167,9 @@ def atividades_page():
             for h, lbl in zip(header, header_labels):
                 h.markdown(f"**{lbl}**")
 
+            st.markdown("<hr style='margin:6px 0 12px 0; border:0; border-top:1px solid #e5e7eb;'/>", unsafe_allow_html=True)
+
             for idx, e in enumerate(evidencias):
-                if idx > 0:
-                    st.divider()
                 c1, c2, c3, c4, c5, c6, c7, c8 = st.columns(col_sizes)
                 c1.write(e["tipo"])
                 c2.write(e["nome_arquivo"] or "-")
@@ -182,6 +182,7 @@ def atividades_page():
                     evidencias_repository.soft_delete(conn, e["id"])
                     st.success("Evidência removida.")
                     st.rerun()
+                st.markdown("<hr style='margin:4px 0 10px 0; border:0; border-top:1px solid #e5e7eb;'/>", unsafe_allow_html=True)
 
         st.subheader("Anexar nova evidência")
         with st.form("evid_edit"):
