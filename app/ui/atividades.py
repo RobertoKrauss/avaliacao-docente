@@ -119,12 +119,13 @@ def atividades_page():
         pre_id = st.session_state.pop("atividade_preselect", None)
         if pre_id:
             try:
-                pre_index = [a["id"] for a in atividades].index(pre_id)
+                idx = [a["id"] for a in atividades].index(pre_id)
+                st.session_state["atividade_edit_select"] = atv_labels[idx]
             except ValueError:
-                pre_index = 0
-        else:
-            pre_index = 0
-        escolha = st.selectbox("Selecionar atividade", atv_labels, index=pre_index, key="atividade_edit_select")
+                pass
+        if "atividade_edit_select" not in st.session_state:
+            st.session_state["atividade_edit_select"] = atv_labels[0]
+        escolha = st.selectbox("Selecionar atividade", atv_labels, key="atividade_edit_select")
         atv = atv_map[escolha]
 
         regras = regras_repository.list_padroes(conn) + regras_repository.list_personalizadas_ativas(conn)
