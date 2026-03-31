@@ -19,6 +19,16 @@ TIPOS_PENDENCIA = {
     "potencial_nao_explorado": "Atividade marcada com potencial não explorado.",
 }
 
+RECOMENDACOES = {
+    "atividade_sem_evidencia": "Anexe ao menos uma evidência ou marque a atividade como não obrigatória, conforme o fluxo do fator.",
+    "atividade_sem_regra": "Selecione uma regra de pontuação adequada para esta atividade.",
+    "atividade_sem_fator": "Classifique a atividade em formação, funcional ou produção.",
+    "valor_manual_faltante": "Informe o valor manual exigido pela regra (manual/intervalo) para liberar a pontuação.",
+    "potencial_nao_explorado": "Reveja a atividade e, se aplicável, registre o valor manual ou ajuste a regra para explorar o potencial.",
+    "risco_alto": "Atingiu menos de 50% da meta do fator. Inclua novas atividades ou aumente as existentes e garanta evidências.",
+    "pontuacao_baixa": "Pontuação entre 50% e 80% da meta. Planeje novas entregas ou evidências para este fator.",
+    "revisao_atrasada": "Registre um check-in/revisão para atualizar o acompanhamento e reduzir incerteza.",
+}
 
 def detectar_pendencias(conn: sqlite3.Connection, ano_id: int) -> List[Dict]:
     pendencias = []
@@ -73,6 +83,7 @@ def gerar_alertas(conn: sqlite3.Connection, ano_id: int) -> None:
             tipo_alerta=tipo,
             severidade=sev,
             mensagem=msg,
+            recomendacao=RECOMENDACOES.get(tipo, ""),
             atividade_id=p["atividade_id"],
         )
 
@@ -84,6 +95,7 @@ def gerar_alertas(conn: sqlite3.Connection, ano_id: int) -> None:
                 tipo_alerta="risco_alto",
                 severidade="alta",
                 mensagem=f"Risco alto no fator {fator}.",
+                recomendacao=RECOMENDACOES.get("risco_alto", ""),
                 fator=fator,
             )
         elif risco == "medio":
@@ -93,6 +105,7 @@ def gerar_alertas(conn: sqlite3.Connection, ano_id: int) -> None:
                 tipo_alerta="pontuacao_baixa",
                 severidade="media",
                 mensagem=f"Pontuação ainda em progresso no fator {fator}.",
+                recomendacao=RECOMENDACOES.get("pontuacao_baixa", ""),
                 fator=fator,
             )
 
@@ -106,6 +119,7 @@ def gerar_alertas(conn: sqlite3.Connection, ano_id: int) -> None:
                 tipo_alerta="revisao_atrasada",
                 severidade="media",
                 mensagem="Há mais de 30 dias sem check-in/revisão.",
+                recomendacao=RECOMENDACOES.get("revisao_atrasada", ""),
             )
     else:
         alertas_repository.create_alert(
@@ -114,4 +128,5 @@ def gerar_alertas(conn: sqlite3.Connection, ano_id: int) -> None:
             tipo_alerta="revisao_atrasada",
             severidade="media",
             mensagem="Nenhum check-in registrado para o ano.",
+            recomendacao=RECOMENDACOES.get("revisao_atrasada", ""),
         )
