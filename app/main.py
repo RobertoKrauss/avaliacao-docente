@@ -10,6 +10,7 @@ from app.ui.relatorio import relatorio_page
 from app.ui.chatgpt_mvp import chatgpt_page
 from app.ui.atividades import atividades_page
 from app.ui.import_export import import_export_page
+from app.ui.ajuda import ajuda_page
 
 
 def main():
@@ -23,9 +24,9 @@ def main():
     st.sidebar.title("Navegação")
     page = st.sidebar.radio(
         "Ir para",
-        ["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)", "Import/Export"],
+        ["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)", "Import/Export", "Ajuda"],
         key="nav",
-        index=["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)", "Import/Export"].index(nav_default)
+        index=["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)", "Import/Export", "Ajuda"].index(nav_default)
     )
     if st.sidebar.button("Sair"):
         # encerra o processo do Streamlit imediatamente, sem ações manuais
@@ -48,8 +49,10 @@ def main():
         relatorio_page()
     elif page == "ChatGPT (MVP)":
         chatgpt_page()
-    else:
+    elif page == "Import/Export":
         import_export_page()
+    else:
+        ajuda_page()
 
 
 if __name__ == "__main__":
