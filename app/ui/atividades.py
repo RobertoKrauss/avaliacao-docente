@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import date
+from datetime import date, datetime
 
 from app.ui.theme import apply_theme
 from app.db.connection import get_connection
@@ -7,6 +7,7 @@ from app.db.repositories import (
     anos_repository,
     atividades_repository,
     regras_repository,
+    evidencias_repository,
 )
 
 
@@ -40,7 +41,7 @@ def atividades_page():
             status_n = st.text_input("Status", value="registrada", key="status_novo")
             salvar_n = st.form_submit_button("Criar atividade")
             if salvar_n:
-                atividades_repository.create(
+                new_id = atividades_repository.create(
                     conn,
                     {
                         "ano_id": ano_row["id"],
@@ -55,8 +56,47 @@ def atividades_page():
                         "status": status_n,
                     },
                 )
+                st.session_state["ultima_atividade_criada"] = new_id
                 st.success("Atividade criada.")
                 st.experimental_rerun()
+
+        # Anexar evidência para a última criada
+        last_id = st.session_state.get("ultima_atividade_criada")
+        st.markdown("---")
+        st.subheader("Anexar evidência (última atividade criada)")
+        if last_id:
+            with st.form("evid_nova"):
+                tipo = st.selectbox(
+                    "Tipo de evidência",
+                    ["certificado", "portaria", "ata", "email", "declaracao", "pdf", "imagem", "link", "material_didatico", "print", "outro"],
+                    key="ev_tipo_novo",
+                )
+                nome = st.text_input("Nome do arquivo (opcional)", key="ev_nome_novo")
+                caminho = st.text_input("Caminho/URL (opcional)", key="ev_path_novo")
+                descricao = st.text_area("Descrição (opcional)", height=80, key="ev_desc_novo")
+                data_doc = st.date_input("Data do documento (opcional)", value=None, key="ev_data_doc_novo")
+                obrig = st.checkbox("Obrigatória?", key="ev_obr_novo")
+                aprov = st.checkbox("Aprovada?", key="ev_aprov_novo")
+                salvar_ev = st.form_submit_button("Salvar evidência")
+                if salvar_ev:
+                    evidencias_repository.create(
+                        conn,
+                        {
+                            "atividade_id": last_id,
+                            "tipo": tipo,
+                            "nome_arquivo": nome or None,
+                            "caminho_arquivo": caminho or None,
+                            "descricao": descricao or None,
+                            "data_anexacao": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                            "data_validade": data_doc.strftime("%Y-%m-%d") if data_doc else None,
+                            "validade_status": None,
+                            "obrigatoria": int(obrig),
+                            "aprovada": int(aprov),
+                        },
+                    )
+                    st.success("Evidência salva.")
+        else:
+            st.caption("Crie uma atividade primeiro para anexar evidências aqui.")
 
     # --- Editar atividade ---
     with tabs[1]:
@@ -104,5 +144,58 @@ def atividades_page():
                     },
                 )
                 st.success("Atividade atualizada.")
+                st.experimental_rerun()
+
+        st.markdown("---")
+        st.subheader("Evidências desta atividade")
+        evidencias = evidencias_repository.list_by_atividade(conn, atv["id"])
+        if not evidencias:
+            st.markdown('<div class="empty-state">Nenhuma evidência vinculada.</div>', unsafe_allow_html=True)
+        else:
+            data = [
+                {
+                    "Tipo": e["tipo"],
+                    "Nome": e["nome_arquivo"] or "-",
+                    "Caminho": e["caminho_arquivo"] or "-",
+                    "Data inserção": e["data_anexacao"],
+                    "Data documento": e["data_validade"] or "-",
+                    "Obrigatória": "Sim" if e["obrigatoria"] else "Não",
+                    "Aprovada": "Sim" if e["aprovada"] else "Não",
+                }
+                for e in evidencias
+            ]
+            st.dataframe(data, use_container_width=True, hide_index=True)
+
+        st.subheader("Anexar nova evidência")
+        with st.form("evid_edit"):
+            tipo = st.selectbox(
+                "Tipo de evidência",
+                ["certificado", "portaria", "ata", "email", "declaracao", "pdf", "imagem", "link", "material_didatico", "print", "outro"],
+                key="ev_tipo_edit",
+            )
+            nome = st.text_input("Nome do arquivo (opcional)", key="ev_nome_edit")
+            caminho = st.text_input("Caminho/URL (opcional)", key="ev_path_edit")
+            descricao = st.text_area("Descrição (opcional)", height=80, key="ev_desc_edit")
+            data_doc = st.date_input("Data do documento (opcional)", value=None, key="ev_data_doc_edit")
+            obrig = st.checkbox("Obrigatória?", key="ev_obr_edit")
+            aprov = st.checkbox("Aprovada?", key="ev_aprov_edit")
+            salvar_ev = st.form_submit_button("Salvar evidência desta atividade")
+            if salvar_ev:
+                evidencias_repository.create(
+                    conn,
+                    {
+                        "atividade_id": atv["id"],
+                        "tipo": tipo,
+                        "nome_arquivo": nome or None,
+                        "caminho_arquivo": caminho or None,
+                        "descricao": descricao or None,
+                        "data_anexacao": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                        "data_validade": data_doc.strftime("%Y-%m-%d") if data_doc else None,
+                        "validade_status": None,
+                        "obrigatoria": int(obrig),
+                        "aprovada": int(aprov),
+                    },
+                )
+                st.success("Evidência salva.")
                 st.experimental_rerun()
     conn.close()
