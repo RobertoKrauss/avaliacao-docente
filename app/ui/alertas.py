@@ -63,5 +63,5 @@ def alertas_page():
                     if st.button("Marcar resolvido", key=f"resolve-{a['id']}"):
                         alertas_repository.resolver(conn, a["id"])
                         st.success("Alerta marcado como resolvido.")
-                        st.experimental_rerun()
+                        st.rerun()
     conn.close()

@@ -58,7 +58,7 @@ def atividades_page():
                 )
                 st.session_state["ultima_atividade_criada"] = new_id
                 st.success("Atividade criada.")
-                st.experimental_rerun()
+                st.rerun()
 
         # Anexar evidência para a última criada
         last_id = st.session_state.get("ultima_atividade_criada")
@@ -144,7 +144,7 @@ def atividades_page():
                     },
                 )
                 st.success("Atividade atualizada.")
-                st.experimental_rerun()
+                st.rerun()
 
         st.markdown("---")
         st.subheader("Evidências desta atividade")
@@ -197,5 +197,5 @@ def atividades_page():
                     },
                 )
                 st.success("Evidência salva.")
-                st.experimental_rerun()
+                st.rerun()
     conn.close()

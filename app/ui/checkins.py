@@ -70,5 +70,5 @@ def checkins_page():
             if fator == "geral":
                 anos_repository.marcar_ultima_revisao(conn, ano_row["id"], data_checkin.strftime("%Y-%m-%d"))
             st.success("Check-in registrado.")
-            st.experimental_rerun()
+            st.rerun()
     conn.close()
