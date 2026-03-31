@@ -152,20 +152,31 @@ def atividades_page():
         if not evidencias:
             st.markdown('<div class="empty-state">Nenhuma evidência vinculada.</div>', unsafe_allow_html=True)
         else:
-            st.markdown(
-                "<div class='table-header'>Tipo | Nome | Caminho | Data inserção | Data documento | Obrigatória | Aprovada | Ações</div>",
-                unsafe_allow_html=True,
-            )
+            col_sizes = [1.0, 2.0, 2.2, 1.3, 1.3, 0.9, 0.9, 0.9]
+            header = st.columns(col_sizes)
+            header_labels = [
+                "Tipo",
+                "Nome",
+                "Caminho",
+                "Data inserção",
+                "Data documento",
+                "Obrigatória",
+                "Aprovada",
+                "Ações",
+            ]
+            for h, lbl in zip(header, header_labels):
+                h.markdown(f"**{lbl}**")
+
             for e in evidencias:
-                c1, c2, c3, c4, c5, c6, c7, c8 = st.columns([1.1, 1.6, 1.6, 1.2, 1.2, 0.9, 0.9, 0.8])
-                c1.markdown(f"**{e['tipo']}**")
-                c2.markdown(e["nome_arquivo"] or "-")
-                c3.markdown(e["caminho_arquivo"] or "-")
-                c4.markdown(e["data_anexacao"])
-                c5.markdown(e["data_validade"] or "-")
-                c6.markdown("Sim" if e["obrigatoria"] else "Não")
-                c7.markdown("Sim" if e["aprovada"] else "Não")
-                if c8.button("Remover", key=f"del_ev_{e['id']}"):
+                c1, c2, c3, c4, c5, c6, c7, c8 = st.columns(col_sizes)
+                c1.write(e["tipo"])
+                c2.write(e["nome_arquivo"] or "-")
+                c3.write(e["caminho_arquivo"] or "-")
+                c4.write(e["data_anexacao"])
+                c5.write(e["data_validade"] or "-")
+                c6.write("Sim" if e["obrigatoria"] else "Não")
+                c7.write("Sim" if e["aprovada"] else "Não")
+                if c8.button("Apagar", key=f"del_ev_{e['id']}"):
                     evidencias_repository.soft_delete(conn, e["id"])
                     st.success("Evidência removida.")
                     st.rerun()
