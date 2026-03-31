@@ -25,6 +25,9 @@ def main():
         key="nav",
         index=["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)", "Import/Export"].index(nav_default)
     )
+    if st.sidebar.button("Sair"):
+        st.sidebar.success("Sessão encerrada. Feche esta aba e interrompa o Streamlit no terminal (Ctrl+C).")
+        st.stop()
     if page == "Dashboard":
         render_dashboard()
     elif page == "Atividades":
