@@ -1,131 +1,102 @@
-# Manual de Utilização — Sistema de Controle de Avaliação de Desempenho Docente (v1)
+﻿# Manual de Utilização — Sistema de Avaliação de Desempenho Docente (v1)
 
 ## Índice
 1. Visão geral
 2. Navegação principal
 3. Dashboard
-4. Evidências
-5. Regras
-6. Alertas
-7. Check-ins
-8. Relatório
+4. Atividades (nova e editar + evidências)
+5. Regras de pontuação
+6. Alertas e pendências
+7. Check-ins / Revisões
+8. Relatório anual
 9. ChatGPT (MVP)
-10. Onde ficam as evidências no banco
-11. Palavras‑chave úteis
+10. Importar / Exportar CSV
+11. Onde ficam as evidências no banco
+12. Palavras‑chave úteis
 
 ---
-
 ## 1. Visão geral
-Aplicação local em **Streamlit** com banco **SQLite**. Uso individual: registrar atividades, anexar evidências, aplicar regras de pontuação, revisar riscos/alertas, registrar check-ins, gerar relatório anual e obter sugestões consultivas (MVP ChatGPT).
+Aplicação local em **Streamlit** com banco **SQLite**. Uso individual: registrar atividades, anexar evidências, aplicar regras de pontuação, revisar riscos/alertas, registrar check-ins, gerar relatório anual e salvar sugestões consultivas (MVP ChatGPT). Nenhuma automação externa é feita.
 
 ## 2. Navegação principal
-Na sidebar, escolha:
+Menu lateral (radio):
 - Dashboard
-- Evidências
+- Atividades
 - Regras
 - Alertas
 - Check-ins
 - Relatório
 - ChatGPT (MVP)
-
-Cada item abre a respectiva tela descrita abaixo.
+- Import/Export
 
 ## 3. Dashboard
-Objetivo: visão anual resumida.
-- **Seletor de ano**: escolhe o ano ativo.
-- **Cards por fator** (Formação, Funcional, Produção):
-  - Pontuação estimada / meta
-  - Faltante
-  - Badge de risco (baixo/médio/alto)
-- **Alertas e pendências prioritárias**: lista gerada automaticamente.
-- **Atividades recentes**: últimas atividades do ano.
-- **Sugestões do ChatGPT**: sugestões salvas (somente leitura).
-- Botões rápidos (placeholders): Nova atividade, Gerar relatório, Analisar com ChatGPT, Registrar check-in.
+Objetivo: visão resumida do ano selecionado.
+- Seletor de ano.
+- Botões rápidos: Nova atividade, Gerar relatório, Analisar com ChatGPT, Registrar check-in.
+- Cards por fator (Formação, Funcional, Produção): pontuação estimada/meta, faltante e badge de risco.
+- Blocos: Alertas prioritários, Atividades recentes, Sugestões do ChatGPT (somente leitura).
 
-## 4. Evidências
-Objetivo: anexar e consultar evidências de atividades.
-- Seletor de atividade (por título/data).
-- Formulário:
-  - Tipo (certificado, portaria, ata, email, declaração, pdf, imagem, link, material_didatico, print, outro)
-  - Nome do arquivo (opcional)
-  - Caminho/URL (opcional)
-  - Descrição (opcional)
-  - Obrigatória? / Aprovada?
-  - Salva com data/hora atual
-- Lista de evidências da atividade (tabela).
-- Ao salvar, pendências/alertas são recalculados automaticamente.
-- As evidências não são copiadas nem armazenadas pelo sistema; apenas os metadados ficam no banco SQLite (app/database.sqlite).
+## 4. Atividades (nova e editar + evidências)
+### Nova atividade
+Campos: título, data, fator (formacao/funcional/producao), regra, quantidade, carga horária, valor manual (se aplicável), status. Após salvar, é oferecido formulário para anexar evidência à última atividade criada.
 
-Tabela: evidencias
-Coluna que guarda o caminho/URL do arquivo: caminho_arquivo (texto).
-Ou seja: você salva o arquivo onde quiser (disco local, rede, nuvem) e registra o caminho/URL nessa coluna via tela de Evidências; o banco só referencia esse caminho.
+### Editar atividade
+- Seletor de atividade (usa título + data). Ao vir de um alerta, já abre na aba **Editar** e pré-seleciona a atividade.
+- Edição dos mesmos campos (título, data, fator, regra, quantidade, carga, valor manual, status).
+- **Evidências desta atividade**: tabela em card; cada linha mostra tipo, nome, caminho, datas, flags (obrigatória/aprovada) e botão **Apagar** (soft delete).
+- **Anexar nova evidência**: tipo, nome, caminho/URL, descrição, data do documento, obrigatória?, aprovada?.
 
-## 5. Regras
-Objetivo: consultar regras padrão e gerir regras personalizadas.
-- Aba **Regras padrão**: tabela somente leitura (fator, tipo de fórmula, base, teto).
-- Aba **Personalizadas**:
-  - Lista de regras criadas.
-  - Selecionar regra → desativar ou duplicar.
-  - Regra desativada deixa de ser elegível para novas atividades.
-- Aba **Nova regra personalizada**:
-  - Campos: nome, fator, subtipo, descrição, justificativa (obrigatória), tipo de fórmula (fixo, por_unidade, por_hora, intervalo/manual), valor base, unidade/divisor, teto, evidência necessária, origem do documento, ativa.
-  - Prévia textual da fórmula exibida antes de salvar.
+Observação: apenas metadados são gravados; os arquivos permanecem onde você salvá-los (disco/rede/nuvem) e o campo `caminho_arquivo` referencia o local.
 
-## 6. Alertas
-Objetivo: tratar pendências e riscos.
+## 5. Regras de pontuação
+- **Regras padrão**: leitura das regras fixas (fator, tipo, base, unidade, teto).
+- **Personalizadas**: lista, selecionar, desativar, duplicar e **editar** (formulário pré-preenchido). Regra desativada deixa de ser elegível para novas atividades.
+- **Nova regra personalizada**: nome, fator, subtipo, descrição, justificativa (obrigatória), tipo de fórmula (fixo, por_unidade, por_hora, intervalo, manual), valor base, unidade/divisor, teto, evidência necessária, origem do documento, ativa. Prévia textual exibida antes de salvar.
+
+## 6. Alertas e pendências
 - Filtros: fator, tipo, severidade, status (abertos/resolvidos).
-- Cada alerta em um “expander” mostrando:
-  - Severidade, tipo, mensagem, fator, atividade relacionada.
-  - Recomendação (quando existir).
-  - Ação: “Abrir atividade” (mostra dados) ou “Marcar resolvido”.
-- Estado “resolvido” fica salvo no banco.
+- Cada alerta mostra severidade, mensagem, fator, atividade (quando houver), recomendação e botões:
+  - **Abrir atividade** → navega direto para **Atividades > Editar** com a atividade selecionada.
+  - **Marcar resolvido** → persiste no banco.
+- Alertas órfãos (atividade inexistente) são ocultados automaticamente.
+- Exemplos de recomendações: evidência faltante, valor manual faltante, risco alto (meta <50%), pontuação baixa (50–80% da meta), revisão atrasada.
 
-## 7. Check-ins
-Objetivo: registrar revisões periódicas e visualizar evolução.
-- Tabela de histórico (data, fator/geral, pontuação acumulada, risco, pendências).
-- Gráfico de linha da evolução de pontuação (quando houver dados).
-- Formulário de novo check-in:
-  - Data, fator (geral ou específico), pontuação acumulada, risco (baixo/médio/alto), pendências, nota.
-  - Check-in “geral” atualiza `ultima_revisao` do ano.
+## 7. Check-ins / Revisões
+- Histórico: data, fator/geral, pontuação acumulada, risco, pendências; gráfico de linha quando há dados.
+- Formulário “Novo check-in”: data, fator (geral ou específico), pontuação acumulada, risco (baixo/médio/alto), pendências, nota. Check-in geral atualiza `ultima_revisao` do ano.
 
-## 8. Relatório
-Objetivo: gerar relatório anual em Markdown/CSV.
-- Seleciona o ano (primeiro ano disponível).
-- Prévia em Markdown com:
-  - Resumo por fator (estimada/confirmada)
-  - Lista de atividades
-  - Pendências abertas
-  - Regras personalizadas usadas
-  - Observações finais (campo livre no texto)
-- Download:
-  - `relatorio_<ano>.md`
-  - `atividades_<ano>.csv`
-  - PDF não incluído (mantido fora do escopo mínimo).
+## 8. Relatório anual
+- Seleciona o ano ativo.
+- Prévia em Markdown com resumo por fator, atividades, pendências, regras personalizadas usadas, observações finais.
+- Downloads: `relatorio_<ano>.md` e `atividades_<ano>.csv`.
 
 ## 9. ChatGPT (MVP)
-Objetivo: suporte consultivo (sem alterar dados automaticamente).
 - Modos: análise do ano, por fator, por atividade, redação assistida.
-- Consentimento: checkbox “usar meu perfil de escrita”; persiste em `configuracoes_usuario`.
-- Privacidade: apenas dados selecionados pelo usuário; sem alterações automáticas no banco.
-- Geração (stub) → exibe sugestão → botão “Salvar sugestão” grava em `sugestoes_chatgpt`.
-- Lista de sugestões salvas (tabela).
+- Consentimento: checkbox “usar meu perfil de escrita”; configurações salvas em `configuracoes_usuario`.
+- Somente leitura/consulta: sugestões não alteram o banco automaticamente. Botão “Salvar sugestão” grava em `sugestoes_chatgpt`.
 
-## 10. Onde ficam as evidências no banco
+## 10. Importar / Exportar CSV
+- **Exportar base**: botão “Gerar ZIP com CSVs” gera um ZIP com um CSV por tabela do SQLite (todas as colunas).
+- **Importar base**: envie um ZIP com arquivos `nome_da_tabela.csv` (colunas idênticas às da tabela) e escolha:
+  - **Mesclar (merge)**: `INSERT OR REPLACE` linha a linha.
+  - **Sobrescrever tudo**: apaga a tabela e insere o conteúdo do CSV.
+- Útil para backup, migração ou carga massiva.
+
+## 11. Onde ficam as evidências no banco
 - Tabela: `evidencias`
-- Principais campos: `atividade_id`, `tipo`, `caminho_arquivo`, `descricao`, `data_anexacao`, `obrigatoria`, `aprovada`.
+- Campos principais: `atividade_id`, `tipo`, `caminho_arquivo`, `descricao`, `data_anexacao`, `obrigatoria`, `aprovada`, `data_validade`.
 - Relacionamento: `evidencias.atividade_id` → `atividades.id`.
+- Apenas metadados são armazenados; os arquivos ficam no local/URL informado.
 
-## 11. Palavras‑chave úteis (links internos)
-- [Manual de Utilização — Sistema de Controle de Avaliação de Desempenho Docente (v1)](#manual-de-utilização--sistema-de-controle-de-avaliação-de-desempenho-docente-v1)
-  - [Índice](#índice)
-  - [1. Visão geral](#1-visão-geral)
-  - [2. Navegação principal](#2-navegação-principal)
-  - [3. Dashboard](#3-dashboard)
-  - [4. Evidências](#4-evidências)
-  - [5. Regras](#5-regras)
-  - [6. Alertas](#6-alertas)
-  - [7. Check-ins](#7-check-ins)
-  - [8. Relatório](#8-relatório)
-  - [9. ChatGPT (MVP)](#9-chatgpt-mvp)
-  - [10. Onde ficam as evidências no banco](#10-onde-ficam-as-evidências-no-banco)
-  - [11. Palavras‑chave úteis (links internos)](#11-palavraschave-úteis-links-internos)
+## 12. Palavras‑chave úteis (links internos)
+- [Visão geral](#1-visão-geral)
+- [Navegação principal](#2-navegação-principal)
+- [Dashboard](#3-dashboard)
+- [Atividades](#4-atividades-nova-e-editar--evidências)
+- [Regras](#5-regras-de-pontuação)
+- [Alertas](#6-alertas-e-pendências)
+- [Check-ins](#7-check-ins--revisões)
+- [Relatório](#8-relatório-anual)
+- [ChatGPT](#9-chatgpt-mvp)
+- [Import/Export](#10-importar--exportar-csv)
+- [Evidências no banco](#11-onde-ficam-as-evidências-no-banco)
