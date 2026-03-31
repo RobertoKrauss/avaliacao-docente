@@ -22,15 +22,18 @@ def atividades_page():
 
     st.title("Atividades")
 
-    # controlar aba via session_state para navegação a partir dos alertas
-    if "tab_atividades" not in st.session_state:
-        st.session_state["tab_atividades"] = 0
+    # controle de aba via radio para permitir preseleção ao vir dos alertas
     if st.session_state.get("atividade_preselect"):
-        st.session_state["tab_atividades"] = 1
-    tabs = st.tabs(["Nova atividade", "Editar atividade"], key="tab_atividades")
+        st.session_state["tab_atividades_radio"] = "Editar atividade"
+    tab_choice = st.radio(
+        "",
+        ["Nova atividade", "Editar atividade"],
+        key="tab_atividades_radio",
+        horizontal=True,
+    )
 
     # --- Nova atividade ---
-    with tabs[0]:
+    if tab_choice == "Nova atividade":
         st.subheader("Nova atividade")
         with st.form("nova_atv"):
             regras = regras_repository.list_padroes(conn) + regras_repository.list_personalizadas_ativas(conn)
@@ -104,7 +107,7 @@ def atividades_page():
             st.caption("Crie uma atividade primeiro para anexar evidências aqui.")
 
     # --- Editar atividade ---
-    with tabs[1]:
+    if tab_choice == "Editar atividade":
         atividades = atividades_repository.list_by_ano(conn, ano_row["id"])
         if not atividades:
             st.info("Nenhuma atividade cadastrada neste ano.")

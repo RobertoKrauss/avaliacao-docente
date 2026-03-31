@@ -42,7 +42,8 @@ def alertas_page():
     def atividade_existe(aid):
         if aid is None:
             return True
-        return atividades_repository.get(conn, aid) is not None
+        atv = atividades_repository.get(conn, aid)
+        return atv is not None
 
     alertas = [a for a in alertas if atividade_existe(a["atividade_id"])]
 
@@ -60,10 +61,10 @@ def alertas_page():
             with cols[0]:
                 if a["atividade_id"]:
                     if st.button("Abrir atividade", key=f"open-{a['id']}"):
-                        st.session_state["_nav_target"] = "Atividades"
-                        st.session_state["atividade_preselect"] = a["atividade_id"]
-                        st.session_state["tab_atividades"] = 1  # força aba Editar
-                        st.rerun()
+                    st.session_state["_nav_target"] = "Atividades"
+                    st.session_state["atividade_preselect"] = a["atividade_id"]
+                    st.session_state["tab_atividades_radio"] = "Editar atividade"
+                    st.rerun()
             with cols[1]:
                 if a["resolvido"] == 0:
                     if st.button("Marcar resolvido", key=f"resolve-{a['id']}"):
