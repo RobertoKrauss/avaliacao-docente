@@ -38,6 +38,11 @@ def alertas_page():
         severidade=sev_sel,
         resolvido=resolvido_val,
     )
+    # remover alertas cujas atividades não existem mais (evita alarmes falsos)
+    atividades_ids = {a["id"] for a in atividades_repository.list_by_ano(conn, ano_row["id"])}
+    alertas = [
+        a for a in alertas if (a["atividade_id"] is None) or (a["atividade_id"] in atividades_ids)
+    ]
 
     if not alertas:
         st.info("Nenhum alerta encontrado com os filtros.")
@@ -53,11 +58,10 @@ def alertas_page():
             with cols[0]:
                 if a["atividade_id"]:
                     if st.button("Abrir atividade", key=f"open-{a['id']}"):
-                        atv = atividades_repository.get(conn, a["atividade_id"])
-                        if atv:
-                            st.write(atv)
-                        else:
-                            st.warning("Atividade não encontrada.")
+                        st.session_state["nav"] = "Atividades"
+                        st.session_state["atividade_preselect"] = a["atividade_id"]
+                        st.session_state["tab_atividades"] = 1  # força aba Editar
+                        st.rerun()
             with cols[1]:
                 if a["resolvido"] == 0:
                     if st.button("Marcar resolvido", key=f"resolve-{a['id']}"):

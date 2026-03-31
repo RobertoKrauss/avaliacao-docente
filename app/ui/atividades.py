@@ -22,7 +22,12 @@ def atividades_page():
 
     st.title("Atividades")
 
-    tabs = st.tabs(["Nova atividade", "Editar atividade"])
+    # controlar aba via session_state para navegação a partir dos alertas
+    if "tab_atividades" not in st.session_state:
+        st.session_state["tab_atividades"] = 0
+    if st.session_state.get("atividade_preselect"):
+        st.session_state["tab_atividades"] = 1
+    tabs = st.tabs(["Nova atividade", "Editar atividade"], key="tab_atividades")
 
     # --- Nova atividade ---
     with tabs[0]:
@@ -106,8 +111,17 @@ def atividades_page():
             conn.close()
             return
 
-        atv_map = {f"{a['titulo']} ({a['data_atividade']})": a for a in atividades}
-        escolha = st.selectbox("Selecionar atividade", list(atv_map.keys()))
+        atv_labels = [f"{a['titulo']} ({a['data_atividade']})" for a in atividades]
+        atv_map = {label: a for label, a in zip(atv_labels, atividades)}
+        pre_id = st.session_state.pop("atividade_preselect", None)
+        if pre_id:
+            try:
+                pre_index = [a["id"] for a in atividades].index(pre_id)
+            except ValueError:
+                pre_index = 0
+        else:
+            pre_index = 0
+        escolha = st.selectbox("Selecionar atividade", atv_labels, index=pre_index, key="atividade_edit_select")
         atv = atv_map[escolha]
 
         regras = regras_repository.list_padroes(conn) + regras_repository.list_personalizadas_ativas(conn)
