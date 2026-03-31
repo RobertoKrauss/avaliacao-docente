@@ -58,7 +58,7 @@ def alertas_page():
             with cols[0]:
                 if a["atividade_id"]:
                     if st.button("Abrir atividade", key=f"open-{a['id']}"):
-                        st.session_state["nav"] = "Atividades"
+                        st.session_state["_nav_target"] = "Atividades"
                         st.session_state["atividade_preselect"] = a["atividade_id"]
                         st.session_state["tab_atividades"] = 1  # força aba Editar
                         st.rerun()

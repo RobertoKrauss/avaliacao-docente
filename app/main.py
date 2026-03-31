@@ -10,11 +10,19 @@ from app.ui.atividades import atividades_page
 
 
 def main():
+    # redirecionamento pós-clique (antes de instanciar widgets)
+    nav_default = st.session_state.get("nav", "Dashboard")
+    nav_pending = st.session_state.pop("_nav_target", None)
+    if nav_pending:
+        nav_default = nav_pending
+        st.session_state["nav"] = nav_default
+
     st.sidebar.title("Navegação")
     page = st.sidebar.radio(
         "Ir para",
         ["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)"],
         key="nav",
+        index=["Dashboard", "Atividades", "Regras", "Alertas", "Check-ins", "Relatório", "ChatGPT (MVP)"].index(nav_default)
     )
     if page == "Dashboard":
         render_dashboard()
